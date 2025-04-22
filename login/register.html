@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoteChain - Register</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            width: 400px;
+            background-color: #F3F4F6;
+            border-radius: 8px;
+            padding: 30px;
+            position: relative; /* Position relative to place logo outside container */
+        }
+
+        .logo {
+            position: absolute;
+            top: 10px;
+            left: 10px; /* Position logo to the left of the container */
+        }
+
+        .logo img {
+            width: 120px;
+            height: auto;
+        }
+        
+        h1 {
+            font-size: 32px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .password-container {
+            position: relative;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .btn-signin {
+            width: 100%;
+            padding: 12px;
+            background-color: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            color: #999;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background-color: #ddd;
+        }
+
+        .divider span {
+            padding: 0 10px;
+            font-size: 14px;
+        }
+
+        .social-signin {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .social-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: white;
+            cursor: pointer;
+            font-size: 14px;
+            color: #333;
+            text-decoration: none;
+        }
+
+        .social-icon {
+            margin-right: 10px;
+            width: 18px;
+            height: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="logo">
+        <img src="C:\Rishabh\Somaiya\Sem 6\0NO ESE\mpl\NEW\Images\logo.png" alt="VoteChain Logo">
+    </div>
+    <div class="container">
+        <h1>Register</h1>
+        <form id="registerForm">
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" placeholder="Your Name">
+            </div>
+
+            <div class="form-group">
+                <label for="email">E-mail</label>
+                <input type="email" id="email" placeholder="example@mail.com">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="password-container">
+                    <input type="password" id="password" placeholder="******">
+                    <span class="toggle-password" id="togglePassword">👁️</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="confirm-password">Confirm Password</label>
+                <div class="password-container">
+                    <input type="password" id="confirm-password" placeholder="******">
+                    <span class="toggle-password" id="toggleConfirmPassword">👁️</span>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-signin">Sign up</button>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Toggle password visibility
+            const togglePassword = document.getElementById('togglePassword');
+            const passwordInput = document.getElementById('password');
+            
+            togglePassword.addEventListener('click', function() {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                togglePassword.textContent = type === 'password' ? '👁️' : '👁️‍🗨️';
+            });
+
+            const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+            const confirmPasswordInput = document.getElementById('confirm-password');
+            
+            toggleConfirmPassword.addEventListener('click', function() {
+                const type = confirmPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                confirmPasswordInput.setAttribute('type', type);
+                toggleConfirmPassword.textContent = type === 'password' ? '👁️' : '👁️‍🗨️';
+            });
+
+            // Form submission
+            const registerForm = document.getElementById('registerForm');
+            
+            registerForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const name = document.getElementById('name').value;
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('confirm-password').value;
+                
+                // In a real application, you would send this data to a server
+                if (password === confirmPassword) {
+                    const userData = {
+                        name: name,
+                        email: email,
+                        password: password
+                    };
+
+                    // Send data to Flask backend
+                    fetch('http://127.0.0.1:5000/register', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(userData)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        alert(data.message);  // Show success message
+                        window.location.href = "C:/Rishabh/Somaiya/Sem 6/0NO ESE/mpl/NEW/Landing/landing.html";  // Redirect after success
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred during registration.');
+                    });
+                } else {
+                    alert('Passwords do not match!');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

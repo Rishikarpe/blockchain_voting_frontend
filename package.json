@@ -8,11 +8,20 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "��#\u0000 \u0000b\u0000l\u0000o\u0000c\u0000k\u0000c\u0000h\u0000a\u0000i\u0000n\u0000_\u0000v\u0000o\u0000t\u0000i\u0000n\u0000g\u0000_\u0000f\u0000r\u0000o\u0000n\u0000t\u0000e\u0000n\u0000d\u0000\r\u0000 \u0000",
   "dependencies": {
     "body-parser": "^2.2.0",
     "express": "^5.1.0",
     "multer": "^1.4.5-lts.2",
     "path": "^0.12.7"
-  }
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Rishikarpe/blockchain_voting_frontend.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Rishikarpe/blockchain_voting_frontend/issues"
+  },
+  "homepage": "https://github.com/Rishikarpe/blockchain_voting_frontend#readme"
 }

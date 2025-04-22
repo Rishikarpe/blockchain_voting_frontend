@@ -102,16 +102,50 @@
 
         /* Hero Section */
         .hero {
-            padding: 80px 0 40px;
+            position: relative;
+            padding: 80px 0; /* Adjust padding if needed */
+            overflow: hidden;
+            display: flex;
+            justify-content: center; /* Centers horizontally */
+            align-items: center; /* Centers vertically */
+            height: 100vh; /* Full viewport height */
+        }
+
+        .hero video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -2; /* Ensures the video stays in the background */
+        }
+
+        /* Frosted Glass Effect for Card */
+        .card {
+            backdrop-filter: blur(10px) saturate(100%);
+            -webkit-backdrop-filter: blur(6px) saturate(100%);
+            background-color: rgba(255, 255, 255, 0);
+            border-radius: 12px;
+            position: absolute;
+            top: 49%; /* Centers vertically */
+            left: 50%; /* Centers horizontally */
+            transform: translate(-50%, -50%); /* Adjusts the card position to truly center it */
+            width: 40%; /* Adjust the width as needed */
+            height: 30%; /* Make sure the card spans the full height */
+            z-index: -1; /* Ensures the card stays behind the content */
         }
 
         .hero-content {
             max-width: 600px;
+            text-align: center;
+            color: #ffffff;
+            z-index: 1; /* Keeps the content above the card */
         }
 
         .hero-title {
-            font-size: 36px;
-            margin-bottom: 20px;
+            font-size: 46px;
+            margin-bottom: 60px;
             font-weight: 700;
         }
 
@@ -315,11 +349,10 @@
                 </div>
                 <div class="nav-links">
                     <ul>
-                        <li><a href="#">Home</a></li>
-                        <li><a href="#">For Us</a></li>
-                        <li><a href="#">Features</a></li>
+                        <li><a href="#hero">Home</a></li>
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#how-it-works">How it Works?</a></li>
                         <li><a href="C:\Rishabh\Somaiya\Sem 6\0NO ESE\mpl\NEW\Start\kyc.html">Start voting</a></li>
-                        <li><a href="#">Contact Us</a></li>
                     </ul>
                 </div>
                 <div class="auth-buttons">
@@ -329,16 +362,28 @@
         </div>
     </header>
 
-    <section class="hero">
+    <div class="hero" id="hero">
+        <!-- Background video element -->
+        <video autoplay muted loop>
+            <source src="C:\Rishabh\Somaiya\Sem 6\0NO ESE\mpl\NEW\Images\bgvid.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+
+        <div class="card">
+
+        </div>
+
+
         <div class="container">
             <div class="hero-content">
                 <h1 class="hero-title">Welcome To <span class="vote-color">Vote</span><span class="chain-color">Chain</span></h1>
                 <p class="hero-description">Your secure, transparent, and decentralized voting platform powered by blockchain technology.</p>
             </div>
         </div>
-    </section>
+    </div>
 
-    <section class="features">
+    <!-- Features Section -->
+    <div class="features" id="features">
         <div class="container">
             <h2 class="section-title">Why Choose VoteChain?</h2>
             <div class="features-grid">
@@ -359,9 +404,9 @@
                 </div>
             </div>
         </div>
-    </section>
+    </div>
 
-    <section class="how-it-works">
+    <div class="how-it-works" id="how-it-works">
         <div class="container">
             <h2 class="section-title">How VoteChain Works?</h2>
             <div class="steps">
@@ -395,13 +440,14 @@
                 </div>
             </div>
         </div>
-    </section>
+    </div>
 
+    <!-- CTA Section -->
     <section class="cta">
         <div class="container">
             <h2 class="cta-title">Ready to Experience Secure Voting?</h2>
             <p class="cta-description">Join the blockchain revolution today. Start casting your votes securely!</p>
-            <a href="#" class="get-started-btn">Get Started</a>
+            <a href="C:\Rishabh\Somaiya\Sem 6\0NO ESE\mpl\NEW\Start\kyc.html" class="get-started-btn">Get Started</a>
         </div>
     </section>
 
@@ -417,30 +463,6 @@
                 document.querySelector(targetId).scrollIntoView({
                     behavior: 'smooth'
                 });
-            });
-        });
-
-        // Add active class to current navigation item
-        const navLinks = document.querySelectorAll('.nav-links a');
-        
-        navLinks.forEach(link => {
-            link.addEventListener('click', function() {
-                navLinks.forEach(item => item.classList.remove('active'));
-                this.classList.add('active');
-            });
-        });
-
-        // Add scroll animation for sections
-        window.addEventListener('scroll', function() {
-            const sections = document.querySelectorAll('section');
-            
-            sections.forEach(section => {
-                const sectionTop = section.getBoundingClientRect().top;
-                const windowHeight = window.innerHeight;
-                
-                if (sectionTop < windowHeight * 0.75) {
-                    section.classList.add('fade-in');
-                }
             });
         });
     </script>

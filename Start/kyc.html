@@ -335,13 +335,65 @@
         #fileInput {
             display: none;
         }
+        
+        /* Blockchain info display */
+        .blockchain-info {
+            background-color: #f5f9ff;
+            border-radius: 4px;
+            padding: 15px;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+        
+        .blockchain-info h4 {
+            color: #0066cc;
+            margin-bottom: 10px;
+        }
+        
+        .blockchain-info code {
+            font-family: monospace;
+            background-color: #e8f0fe;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        
+        .verification-log {
+            height: 120px;
+            overflow-y: auto;
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            margin-top: 15px;
+        }
+        
+        .log-entry {
+            margin-bottom: 5px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .log-time {
+            color: #0066cc;
+        }
+        
+        .log-success {
+            color: #00cc99;
+        }
+        
+        .log-error {
+            color: #ff5252;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
             <div class="logo">
-                <img src="C:\Rishabh\Somaiya\Sem 6\0NO ESE\mpl\NEW\Images\logo.png" alt="VoteChain Logo">
+                <!-- Replace with your actual logo URL -->
+                <h2><span class="vote-color">Vote</span><span class="chain-color">Chain</span></h2>
             </div>
             <h1><span class="vote-color">Vote</span><span class="chain-color">Chain</span> e-KYC Verification</h1>
             <p class="subtitle">Verify your identity to ensure secure voting on our platform</p>
@@ -386,11 +438,13 @@
                 <div class="form-group" id="voterIdFields">
                     <label for="voterId">Voter ID Number</label>
                     <input type="text" id="voterId" placeholder="Enter your Voter ID number" maxlength="10">
+                    <small>For testing, use: ABC1234567 with DOB: 15/04/1985</small>
                 </div>
 
                 <div class="form-group" id="aadhaarFields" style="display: none;">
                     <label for="aadhaarId">Aadhaar Number</label>
                     <input type="number" id="aadhaarId" placeholder="Enter your 12-digit Aadhaar number" maxlength="12">
+                    <small>For testing, use: 123456789012 with DOB: 10/12/1982</small>
                 </div>
 
                 <div class="form-group">
@@ -461,6 +515,10 @@
                     <p id="verificationStatus">Initializing verification...</p>
                 </div>
 
+                <div class="verification-log" id="verificationLog">
+                    <!-- Verification logs will be displayed here -->
+                </div>
+
                 <div class="button-container">
                     <button class="btn-back" id="backToUpload">Back</button>
                     <button class="btn-next" id="completeVerification" disabled>Continue</button>
@@ -473,6 +531,14 @@
                     <div class="success-icon">✅</div>
                     <h3 class="success-message">Verification Successful</h3>
                     <p class="success-details">Your identity has been successfully verified. You can now proceed with the voting process.</p>
+                    
+                    <div class="blockchain-info" id="blockchainInfo">
+                        <h4>Blockchain Verification Record</h4>
+                        <p>Transaction ID: <code id="transactionId">...</code></p>
+                        <p>Timestamp: <code id="timestamp">...</code></p>
+                        <p>Block Number: <code id="blockNumber">...</code></p>
+                    </div>
+                    
                     <button class="btn-next" id="finishButton">Continue to Voting</button>
                 </div>
             </div>
@@ -481,316 +547,620 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Elements
-            const selectIdSection = document.getElementById('selectIdSection');
-            const uploadIdSection = document.getElementById('uploadIdSection');
-            const verificationSection = document.getElementById('verificationSection');
-            const successSection = document.getElementById('successSection');
-
-            const voterIdFields = document.getElementById('voterIdFields');
-            const aadhaarFields = document.getElementById('aadhaarFields');
-            
-            const uploadMethodFile = document.getElementById('uploadMethodFile');
-            const uploadMethodCamera = document.getElementById('uploadMethodCamera');
-            
-            const fileInput = document.getElementById('fileInput');
-            const previewContainer = document.getElementById('previewContainer');
-            const previewImage = document.getElementById('previewImage');
-            
-            const cameraFeed = document.getElementById('cameraFeed');
-            const captureButton = document.getElementById('captureButton');
-            const retryButton = document.getElementById('retryButton');
-            const captureCanvas = document.getElementById('captureCanvas');
-            
-            const progressFill = document.getElementById('progressFill');
-            const verificationStatus = document.getElementById('verificationStatus');
-            
-            // Step indicators
-            const step1 = document.getElementById('step1');
-            const step2 = document.getElementById('step2');
-            const step3 = document.getElementById('step3');
-            const step4 = document.getElementById('step4');
-            
-            // Navigation buttons
-            const nextToUpload = document.getElementById('nextToUpload');
-            const backToSelect = document.getElementById('backToSelect');
-            const nextToVerify = document.getElementById('nextToVerify');
-            const backToUpload = document.getElementById('backToUpload');
-            const completeVerification = document.getElementById('completeVerification');
-            const finishButton = document.getElementById('finishButton');
-
-            // Change ID Type selection
-            document.querySelectorAll('input[name="idType"]').forEach(function(radio) {
-                radio.addEventListener('change', function() {
-                    if (this.value === 'voter') {
-                        voterIdFields.style.display = 'block';
-                        aadhaarFields.style.display = 'none';
-                    } else {
-                        voterIdFields.style.display = 'none';
-                        aadhaarFields.style.display = 'block';
-                    }
-                });
-            });
-            
-            // Change upload method
-            document.querySelectorAll('input[name="uploadMethod"]').forEach(function(radio) {
-                radio.addEventListener('change', function() {
-                    if (this.value === 'upload') {
-                        uploadMethodFile.style.display = 'block';
-                        uploadMethodCamera.style.display = 'none';
-                        stopCamera();
-                    } else {
-                        uploadMethodFile.style.display = 'none';
-                        uploadMethodCamera.style.display = 'block';
-                        startCamera();
-                    }
-                });
-            });
-            
-            // File upload and preview
-            fileInput.addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(event) {
-                        previewImage.src = event.target.result;
-                        previewContainer.style.display = 'block';
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
-            
-            // Camera functions
-            let stream = null;
-            
-            function startCamera() {
-                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                    navigator.mediaDevices.getUserMedia({ video: true })
-                        .then(function(mediaStream) {
-                            stream = mediaStream;
-                            cameraFeed.srcObject = mediaStream;
-                            cameraFeed.play();
-                            captureButton.style.display = 'block';
-                            retryButton.style.display = 'none';
-                        })
-                        .catch(function(err) {
-                            console.log("Camera error: " + err);
-                            alert("Camera access is required for this feature. Please allow camera access or use file upload.");
+    // *** MOCK DATABASE AND VERIFICATION FUNCTIONS ***
+    
+    // Mock database of UIDs for testing
+    const mockUserDatabase = {
+        // Voter IDs
+        "ABC1234567": { name: "John Doe", dob: "15/04/1985", faceHash: "face_hash_1" },
+        "XYZ9876543": { name: "Jane Smith", dob: "22/09/1990", faceHash: "face_hash_2" },
+        
+        // Aadhaar numbers
+        "123456789012": { name: "Amit Kumar", dob: "10/12/1982", faceHash: "face_hash_3" },
+        "987654321098": { name: "Priya Sharma", dob: "05/06/1995", faceHash: "face_hash_4" }
+    };
+    
+    // Mock UID verification function
+    function verifyUID(idType, idNumber, dob) {
+        return new Promise((resolve, reject) => {
+            // Simulate network delay
+            setTimeout(() => {
+                if (idType === 'voter') {
+                    if (mockUserDatabase[idNumber] && mockUserDatabase[idNumber].dob === dob) {
+                        resolve({
+                            verified: true,
+                            userData: mockUserDatabase[idNumber]
                         });
-                } else {
-                    alert("Your browser doesn't support camera access. Please use file upload instead.");
+                    } else {
+                        resolve({
+                            verified: false,
+                            error: "Invalid Voter ID or date of birth"
+                        });
+                    }
+                } else if (idType === 'aadhaar') {
+                    if (mockUserDatabase[idNumber] && mockUserDatabase[idNumber].dob === dob) {
+                        resolve({
+                            verified: true,
+                            userData: mockUserDatabase[idNumber]
+                        });
+                    } else {
+                        resolve({
+                            verified: false,
+                            error: "Invalid Aadhaar number or date of birth"
+                        });
+                    }
                 }
-            }
-            
-            function stopCamera() {
-                if (stream) {
-                    stream.getTracks().forEach(function(track) {
-                        track.stop();
+            }, 1500); // Simulate 1.5s delay
+        });
+    }
+    
+    // Mock face recognition function
+    function performFaceRecognition(capturedImageData, storedFaceHash) {
+        return new Promise((resolve, reject) => {
+            // Simulate processing delay
+            setTimeout(() => {
+                // Random success rate of 80% for testing
+                const isMatch = Math.random() < 0.8;
+                
+                if (isMatch) {
+                    resolve({
+                        success: true,
+                        confidence: (Math.random() * 20 + 80).toFixed(2) // Random confidence between 80-100%
                     });
-                    stream = null;
-                }
-            }
-            
-            // Capture photo
-            captureButton.addEventListener('click', function() {
-                const context = captureCanvas.getContext('2d');
-                captureCanvas.width = cameraFeed.videoWidth;
-                captureCanvas.height = cameraFeed.videoHeight;
-                context.drawImage(cameraFeed, 0, 0, captureCanvas.width, captureCanvas.height);
-                
-                const imageDataURL = captureCanvas.toDataURL('image/png');
-                
-                // Display the captured image in preview
-                previewImage.src = imageDataURL;
-                previewContainer.style.display = 'block';
-                
-                // Switch buttons
-                captureButton.style.display = 'none';
-                retryButton.style.display = 'block';
-                
-                // Pause video
-                cameraFeed.pause();
-            });
-            
-            // Retry capture
-            retryButton.addEventListener('click', function() {
-                previewContainer.style.display = 'none';
-                captureButton.style.display = 'block';
-                retryButton.style.display = 'none';
-                
-                // Resume camera
-                if (stream) {
-                    cameraFeed.play();
                 } else {
-                    startCamera();
+                    resolve({
+                        success: false,
+                        confidence: (Math.random() * 30 + 50).toFixed(2), // Random confidence between 50-80%
+                        error: "Face verification failed. Please try again."
+                    });
                 }
-            });
+            }, 2000); // Simulate 2s delay
+        });
+    }
+    
+    // Custom UID generation function
+    function generateUID(idType) {
+        if (idType === 'voter') {
+            // Generate a random 10-character Voter ID
+            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = '';
             
-            // Navigation - Step 1 to Step 2
-            nextToUpload.addEventListener('click', function() {
-                // Basic validation for step 1
-                const voterId = document.getElementById('voterId').value;
-                const aadhaarId = document.getElementById('aadhaarId').value;
-                const dob = document.getElementById('dob').value;
-                const idType = document.querySelector('input[name="idType"]:checked').value;
-                
-                let isValid = true;
-                let errorMessage = "";
-                
-                if (idType === 'voter' && (!voterId || voterId.length < 6)) {
-                    isValid = false;
-                    errorMessage = "Please enter a valid Voter ID number";
-                } else if (idType === 'aadhaar' && (!aadhaarId || aadhaarId.length !== 12)) {
-                    isValid = false;
-                    errorMessage = "Please enter a valid 12-digit Aadhaar number";
-                }
-                
-                if (!dob || !/^\d{2}\/\d{2}\/\d{4}$/.test(dob)) {
-                    isValid = false;
-                    errorMessage = "Please enter a valid date of birth in DD/MM/YYYY format";
-                }
-                
-                if (!isValid) {
-                    alert(errorMessage);
-                    return;
-                }
-                
-                // Proceed to next step
-                selectIdSection.style.display = 'none';
-                uploadIdSection.style.display = 'block';
-                
-                // Update step indicator
-                step1.classList.remove('active');
-                step1.classList.add('completed');
-                step2.classList.add('active');
-            });
-            
-            // Back from Step 2 to Step 1
-            backToSelect.addEventListener('click', function() {
-                uploadIdSection.style.display = 'none';
-                selectIdSection.style.display = 'block';
-                
-                // Update step indicator
-                step2.classList.remove('active');
-                step1.classList.remove('completed');
-                step1.classList.add('active');
-                
-                // Stop camera if it's running
-                stopCamera();
-            });
-            
-            // Navigation - Step 2 to Step 3
-            nextToVerify.addEventListener('click', function() {
-                // Basic validation for step 2
-                const uploadMethod = document.querySelector('input[name="uploadMethod"]:checked').value;
-                let isValid = false;
-                
-                if (uploadMethod === 'upload' && fileInput.files.length > 0) {
-                    isValid = true;
-                } else if (uploadMethod === 'camera' && previewContainer.style.display === 'block') {
-                    isValid = true;
-                }
-                
-                if (!isValid) {
-                    alert("Please upload or capture a document image before proceeding");
-                    return;
-                }
-                
-                // Proceed to verification step
-                uploadIdSection.style.display = 'none';
-                verificationSection.style.display = 'block';
-                
-                // Update step indicator
-                step2.classList.remove('active');
-                step2.classList.add('completed');
-                step3.classList.add('active');
-                
-                // Stop camera if it's running
-                stopCamera();
-                
-                // Start verification simulation
-                simulateVerification();
-            });
-            
-            // Back from Step 3 to Step 2
-            backToUpload.addEventListener('click', function() {
-                verificationSection.style.display = 'none';
-                uploadIdSection.style.display = 'block';
-                
-                // Update step indicator
-                step3.classList.remove('active');
-                step2.classList.remove('completed');
-                step2.classList.add('active');
-                
-                // Reset verification simulation
-                resetVerification();
-                
-                // Resume camera if necessary
-                const uploadMethod = document.querySelector('input[name="uploadMethod"]:checked').value;
-                if (uploadMethod === 'camera') {
-                    startCamera();
-                }
-            });
-            
-            // Complete verification and go to success screen
-            completeVerification.addEventListener('click', function() {
-                verificationSection.style.display = 'none';
-                successSection.style.display = 'block';
-                
-                // Update step indicator
-                step3.classList.remove('active');
-                step3.classList.add('completed');
-                step4.classList.add('active');
-            });
-            
-            // Finish button - would redirect to voting page in actual implementation
-            finishButton.addEventListener('click', function() {
-                alert('Verification complete! Redirecting to voting page...');
-                // In a real implementation, redirect to voting page
-                // window.location.href = '/voting.html';
-            });
-            
-            // Simulate verification progress
-            function simulateVerification() {
-                let progress = 0;
-                const verificationSteps = [
-                    "Initializing verification...",
-                    "Analyzing document...",
-                    "Verifying information...",
-                    "Matching records...",
-                    "Validation complete!",
-                ];
-                let currentStep = 0;
-                
-                progressFill.style.width = "0%";
-                verificationStatus.textContent = verificationSteps[0];
-                
-                const interval = setInterval(function() {
-                    progress += 5;
-                    progressFill.style.width = progress + "%";
-                    
-                    if (progress >= 100) {
-                        clearInterval(interval);
-                        verificationStatus.textContent = "Verification successful!";
-                        completeVerification.disabled = false;
-                        return;
-                    }
-                    
-                    // Update status message at certain progress points
-                    if (progress % 25 === 0 && currentStep < verificationSteps.length - 1) {
-                        currentStep++;
-                        verificationStatus.textContent = verificationSteps[currentStep];
-                    }
-                }, 100);
+            // First 3 characters are letters
+            for (let i = 0; i < 3; i++) {
+                result += characters.charAt(Math.floor(Math.random() * 26));
             }
             
-            // Reset verification state
-            function resetVerification() {
-                progressFill.style.width = "0%";
-                verificationStatus.textContent = "Initializing verification...";
-                completeVerification.disabled = true;
+            // Next 7 characters are numbers
+            for (let i = 0; i < 7; i++) {
+                result += characters.charAt(Math.floor(Math.random() * 10) + 26);
+            }
+            
+            return result;
+        } else if (idType === 'aadhaar') {
+            // Generate a random 12-digit Aadhaar number
+            let result = '';
+            for (let i = 0; i < 12; i++) {
+                result += Math.floor(Math.random() * 10);
+            }
+            return result;
+        }
+        
+        return null;
+    }
+    
+    // *** BLOCKCHAIN IMPLEMENTATION ***
+    
+    // Simplified blockchain class for e-KYC verification records
+    class VoteChainBlock {
+        constructor(index, timestamp, data, previousHash = '') {
+            this.index = index;
+            this.timestamp = timestamp;
+            this.data = data;
+            this.previousHash = previousHash;
+            this.hash = this.calculateHash();
+            this.nonce = 0;
+        }
+
+        calculateHash() {
+            // In a real implementation, you would use a proper hashing library
+            return btoa(JSON.stringify(this) + this.nonce);
+        }
+
+        mineBlock(difficulty) {
+            // Simple proof of work
+            while (this.hash.substring(0, difficulty) !== Array(difficulty + 1).join("0")) {
+                this.nonce++;
+                this.hash = this.calculateHash();
+            }
+            
+            // Log mining success
+            logVerificationStep("Block mined: " + this.hash.substring(0, 16) + "...");
+        }
+    }
+
+    class VoteChain {
+        constructor() {
+            this.chain = [this.createGenesisBlock()];
+            this.difficulty = 2;
+            this.pendingTransactions = [];
+        }
+
+        createGenesisBlock() {
+            return new VoteChainBlock(0, Date.now(), "Genesis Block", "0");
+        }
+
+        getLatestBlock() {
+            return this.chain[this.chain.length - 1];
+        }
+
+        addVerificationRecord(userId, verificationData) {
+            const timestamp = Date.now();
+            const transactionId = this.generateTransactionId(userId, timestamp);
+            
+            const newBlock = new VoteChainBlock(
+                this.chain.length,
+                timestamp,
+                {
+                    userId: userId,
+                    transactionId: transactionId,
+                    verificationData: verificationData,
+                    action: "e-KYC Verification"
+                },
+                this.getLatestBlock().hash
+            );
+            
+            newBlock.mineBlock(this.difficulty);
+            this.chain.push(newBlock);
+            
+            return newBlock;
+        }
+
+        generateTransactionId(userId, timestamp) {
+            // Simple transaction ID generator
+            return "txn_" + btoa(userId + timestamp).substring(0, 16);
+        }
+
+        isChainValid() {
+            for (let i = 1; i < this.chain.length; i++) {
+                const currentBlock = this.chain[i];
+                const previousBlock = this.chain[i - 1];
+
+                if (currentBlock.hash !== currentBlock.calculateHash()) {
+                    return false;
+                }
+
+                if (currentBlock.previousHash !== previousBlock.hash) {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
+
+    // Initialize blockchain
+    const voteChain = new VoteChain();
+    
+    // *** UI ELEMENTS AND EVENT HANDLERS ***
+    
+    // Elements
+    const selectIdSection = document.getElementById('selectIdSection');
+    const uploadIdSection = document.getElementById('uploadIdSection');
+    const verificationSection = document.getElementById('verificationSection');
+    const successSection = document.getElementById('successSection');
+
+    const voterIdFields = document.getElementById('voterIdFields');
+    const aadhaarFields = document.getElementById('aadhaarFields');
+    
+    const uploadMethodFile = document.getElementById('uploadMethodFile');
+    const uploadMethodCamera = document.getElementById('uploadMethodCamera');
+    
+    const fileInput = document.getElementById('fileInput');
+    const previewContainer = document.getElementById('previewContainer');
+    const previewImage = document.getElementById('previewImage');
+    
+    const cameraFeed = document.getElementById('cameraFeed');
+    const captureButton = document.getElementById('captureButton');
+    const retryButton = document.getElementById('retryButton');
+    const captureCanvas = document.getElementById('captureCanvas');
+    
+    const progressFill = document.getElementById('progressFill');
+    const verificationStatus = document.getElementById('verificationStatus');
+    const verificationLog = document.getElementById('verificationLog');
+    
+    // Blockchain info elements
+    const transactionIdElement = document.getElementById('transactionId');
+    const timestampElement = document.getElementById('timestamp');
+    const blockNumberElement = document.getElementById('blockNumber');
+    
+    // Step indicators
+    const step1 = document.getElementById('step1');
+    const step2 = document.getElementById('step2');
+    const step3 = document.getElementById('step3');
+    const step4 = document.getElementById('step4');
+    
+    // Navigation buttons
+    const nextToUpload = document.getElementById('nextToUpload');
+    const backToSelect = document.getElementById('backToSelect');
+    const nextToVerify = document.getElementById('nextToVerify');
+    const backToUpload = document.getElementById('backToUpload');
+    const completeVerification = document.getElementById('completeVerification');
+    const finishButton = document.getElementById('finishButton');
+
+    // Verification log function
+    function logVerificationStep(message, type = 'info') {
+        const now = new Date();
+        const timeString = now.getHours().toString().padStart(2, '0') + ':' + 
+                          now.getMinutes().toString().padStart(2, '0') + ':' + 
+                          now.getSeconds().toString().padStart(2, '0');
+        
+        const logEntry = document.createElement('div');
+        logEntry.className = 'log-entry';
+        
+        let classType = '';
+        if (type === 'success') classType = 'log-success';
+        if (type === 'error') classType = 'log-error';
+        
+        logEntry.innerHTML = `<span class="log-time">[${timeString}]</span> <span class="${classType}">${message}</span>`;
+        verificationLog.appendChild(logEntry);
+        
+        // Auto-scroll to bottom
+        verificationLog.scrollTop = verificationLog.scrollHeight;
+    }
+
+    // Change ID Type selection
+    document.querySelectorAll('input[name="idType"]').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            if (this.value === 'voter') {
+                voterIdFields.style.display = 'block';
+                aadhaarFields.style.display = 'none';
+            } else {
+                voterIdFields.style.display = 'none';
+                aadhaarFields.style.display = 'block';
             }
         });
+    });
+    
+    // Change upload method
+    document.querySelectorAll('input[name="uploadMethod"]').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            if (this.value === 'upload') {
+                uploadMethodFile.style.display = 'block';
+                uploadMethodCamera.style.display = 'none';
+                stopCamera();
+            } else {
+                uploadMethodFile.style.display = 'none';
+                uploadMethodCamera.style.display = 'block';
+                startCamera();
+            }
+        });
+    });
+    
+    // File upload and preview
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                previewImage.src = event.target.result;
+                previewContainer.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+    
+    // Camera functions
+    let stream = null;
+    
+    function startCamera() {
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(function(mediaStream) {
+                    stream = mediaStream;
+                    cameraFeed.srcObject = mediaStream;
+                    cameraFeed.play();
+                    captureButton.style.display = 'block';
+                    retryButton.style.display = 'none';
+                })
+                .catch(function(err) {
+                    console.log("Camera error: " + err);
+                    alert("Camera access is required for this feature. Please allow camera access or use file upload.");
+                });
+        } else {
+            alert("Your browser doesn't support camera access. Please use file upload instead.");
+        }
+    }
+    
+    function stopCamera() {
+        if (stream) {
+            stream.getTracks().forEach(function(track) {
+                track.stop();
+            });
+            stream = null;
+        }
+    }
+    
+    // Capture photo
+    captureButton.addEventListener('click', function() {
+        const context = captureCanvas.getContext('2d');
+        captureCanvas.width = cameraFeed.videoWidth;
+        captureCanvas.height = cameraFeed.videoHeight;
+        context.drawImage(cameraFeed, 0, 0, captureCanvas.width, captureCanvas.height);
+        
+        const imageDataURL = captureCanvas.toDataURL('image/png');
+        
+        // Display the captured image in preview
+        previewImage.src = imageDataURL;
+        previewContainer.style.display = 'block';
+        
+        // Switch buttons
+        captureButton.style.display = 'none';
+        retryButton.style.display = 'block';
+        
+        // Pause video
+        cameraFeed.pause();
+    });
+    
+    // Retry capture
+    retryButton.addEventListener('click', function() {
+        previewContainer.style.display = 'none';
+        captureButton.style.display = 'block';
+        retryButton.style.display = 'none';
+        
+        // Resume camera
+        if (stream) {
+            cameraFeed.play();
+        } else {
+            startCamera();
+        }
+    });
+    
+    // Navigation - Step 1 to Step 2
+    nextToUpload.addEventListener('click', function() {
+        // Get selected ID type
+        const idType = document.querySelector('input[name="idType"]:checked').value;
+        
+        // Get ID number and DOB
+        let idNumber = '';
+        if (idType === 'voter') {
+            idNumber = document.getElementById('voterId').value;
+        } else {
+            idNumber = document.getElementById('aadhaarId').value;
+        }
+        
+        const dob = document.getElementById('dob').value;
+        
+        // Basic validation
+        if (!idNumber) {
+            alert('Please enter your ID number');
+            return;
+        }
+        
+        if (!dob || !dob.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+            alert('Please enter a valid date of birth (DD/MM/YYYY)');
+            return;
+        }
+        
+        // Update UI to show step 2
+        selectIdSection.style.display = 'none';
+        uploadIdSection.style.display = 'block';
+        
+        // Update step indicators
+        step1.classList.remove('active');
+        step1.classList.add('completed');
+        step2.classList.add('active');
+    });
+
+    // Navigation - Step 2 back to Step 1
+    backToSelect.addEventListener('click', function() {
+        uploadIdSection.style.display = 'none';
+        selectIdSection.style.display = 'block';
+        
+        // Update step indicators
+        step2.classList.remove('active');
+        step1.classList.remove('completed');
+        step1.classList.add('active');
+        
+        // Stop camera if running
+        stopCamera();
+    });
+
+    // Navigation - Step 2 to Step 3
+    nextToVerify.addEventListener('click', function() {
+        // Check if ID photo was uploaded or captured
+        if (!previewImage.src || previewImage.src === window.location.href) {
+            alert('Please upload or capture a photo of your ID');
+            return;
+        }
+        
+        // Update UI to show step 3
+        uploadIdSection.style.display = 'none';
+        verificationSection.style.display = 'block';
+        
+        // Update step indicators
+        step2.classList.remove('active');
+        step2.classList.add('completed');
+        step3.classList.add('active');
+        
+        // Stop camera if running
+        stopCamera();
+        
+        // Start verification process
+        startVerificationProcess();
+    });
+
+    // Navigation - Step 3 back to Step 2
+    backToUpload.addEventListener('click', function() {
+        verificationSection.style.display = 'none';
+        uploadIdSection.style.display = 'block';
+        
+        // Update step indicators
+        step3.classList.remove('active');
+        step2.classList.remove('completed');
+        step2.classList.add('active');
+        
+        // Reset verification UI
+        progressFill.style.width = '0%';
+        verificationStatus.textContent = 'Initializing verification...';
+        verificationLog.innerHTML = '';
+        completeVerification.disabled = true;
+    });
+
+    // Navigation - Step 3 to Step 4
+    completeVerification.addEventListener('click', function() {
+        verificationSection.style.display = 'none';
+        successSection.style.display = 'block';
+        
+        // Update step indicators
+        step3.classList.remove('active');
+        step3.classList.add('completed');
+        step4.classList.add('active');
+    });
+
+    // Navigation - Finish button (Step 4)
+    finishButton.addEventListener('click', function() {
+        // In a real app, redirect to voting page
+        alert('You will now be redirected to the voting page.');
+        // window.location.href = 'voting.html';
+    });
+
+    // Verification process
+    function startVerificationProcess() {
+        // Reset verification UI
+        progressFill.style.width = '0%';
+        verificationStatus.textContent = 'Initializing verification...';
+        verificationLog.innerHTML = '';
+        
+        // Get user data
+        const idType = document.querySelector('input[name="idType"]:checked').value;
+        let idNumber = '';
+        if (idType === 'voter') {
+            idNumber = document.getElementById('voterId').value;
+        } else {
+            idNumber = document.getElementById('aadhaarId').value;
+        }
+        const dob = document.getElementById('dob').value;
+        
+        // Start the verification steps
+        logVerificationStep('Starting e-KYC verification process');
+        
+        // Step 1: Verify ID number and DOB
+        logVerificationStep('Verifying ID credentials');
+        progressFill.style.width = '20%';
+        verificationStatus.textContent = 'Verifying ID credentials...';
+        
+        verifyUID(idType, idNumber, dob).then(result => {
+            if (result.verified) {
+                logVerificationStep('ID credentials verified successfully', 'success');
+                
+                // Step 2: Document authenticity check
+                progressFill.style.width = '40%';
+                verificationStatus.textContent = 'Checking document authenticity...';
+                logVerificationStep('Performing document authenticity check');
+                
+                setTimeout(() => {
+                    // Simulate document check (always succeeds in this demo)
+                    logVerificationStep('Document authenticity confirmed', 'success');
+                    
+                    // Step 3: Face recognition
+                    progressFill.style.width = '60%';
+                    verificationStatus.textContent = 'Performing facial recognition...';
+                    logVerificationStep('Initiating facial recognition comparison');
+                    
+                    performFaceRecognition(previewImage.src, result.userData.faceHash).then(faceResult => {
+                        if (faceResult.success) {
+                            logVerificationStep(`Facial match confirmed (${faceResult.confidence}% confidence)`, 'success');
+                            
+                            // Step 4: Blockchain verification record
+                            progressFill.style.width = '80%';
+                            verificationStatus.textContent = 'Creating blockchain verification record...';
+                            logVerificationStep('Creating immutable verification record on blockchain');
+                            
+                            // Create blockchain verification record
+                            setTimeout(() => {
+                                const verificationData = {
+                                    idType: idType,
+                                    name: result.userData.name,
+                                    timestamp: new Date().toISOString(),
+                                    verificationMethod: 'e-KYC',
+                                    faceMatchConfidence: faceResult.confidence
+                                };
+                                
+                                const newBlock = voteChain.addVerificationRecord(idNumber, verificationData);
+                                
+                                // Update blockchain info display
+                                transactionIdElement.textContent = newBlock.data.transactionId;
+                                timestampElement.textContent = new Date(newBlock.timestamp).toLocaleString();
+                                blockNumberElement.textContent = newBlock.index;
+                                
+                                // Complete verification
+                                progressFill.style.width = '100%';
+                                verificationStatus.textContent = 'Verification completed successfully!';
+                                logVerificationStep('Verification process completed successfully', 'success');
+                                
+                                // Enable continue button
+                                completeVerification.disabled = false;
+                            }, 2000);
+                        } else {
+                            // Face recognition failed
+                            progressFill.style.width = '60%';
+                            verificationStatus.textContent = 'Facial recognition failed';
+                            logVerificationStep(`Facial recognition failed: ${faceResult.error}`, 'error');
+                            logVerificationStep('Please try again with a clearer photo', 'error');
+                        }
+                    });
+                }, 1500);
+            } else {
+                // ID verification failed
+                progressFill.style.width = '20%';
+                verificationStatus.textContent = 'ID verification failed';
+                logVerificationStep(`ID verification failed: ${result.error}`, 'error');
+                logVerificationStep('Please check your ID number and date of birth', 'error');
+            }
+        });
+    }
+
+    // Initialize UI
+    document.querySelector('.upload-container').addEventListener('click', function() {
+        fileInput.click();
+    });
+
+    // Handle drag and drop for file upload
+    const uploadContainer = document.querySelector('.upload-container');
+
+    uploadContainer.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        this.style.borderColor = '#0066cc';
+        this.style.backgroundColor = 'rgba(0, 102, 204, 0.05)';
+    });
+
+    uploadContainer.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        this.style.borderColor = '#ddd';
+        this.style.backgroundColor = '';
+    });
+
+    uploadContainer.addEventListener('drop', function(e) {
+        e.preventDefault();
+        this.style.borderColor = '#ddd';
+        this.style.backgroundColor = '';
+        
+        const file = e.dataTransfer.files[0];
+        if (file) {
+            fileInput.files = e.dataTransfer.files;
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                previewImage.src = event.target.result;
+                previewContainer.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Clean up on page unload
+    window.addEventListener('beforeunload', function() {
+        stopCamera();
+    });
+});
     </script>
 </body>
 </html>
