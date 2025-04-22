@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoteChain - e-KYC Verification</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f8f8f8;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            margin-bottom: 20px;
+        }
+
+        .logo img {
+            height: 50px;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .vote-color {
+            color: #0066cc;
+        }
+
+        .chain-color {
+            color: #00cc99;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 40px;
+        }
+
+        .ekyc-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+
+        .steps-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .steps-indicator::before {
+            content: "";
+            position: absolute;
+            top: 15px;
+            left: 50px;
+            right: 50px;
+            height: 2px;
+            background-color: #ddd;
+            z-index: 1;
+        }
+
+        .step-item {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            width: 120px;
+        }
+
+        .step-circle {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #ddd;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #666;
+        }
+
+        .active .step-circle {
+            background-color: #0066cc;
+            color: white;
+        }
+
+        .completed .step-circle {
+            background-color: #00cc99;
+            color: white;
+        }
+
+        .step-label {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .active .step-label {
+            color: #0066cc;
+            font-weight: bold;
+        }
+
+        .completed .step-label {
+            color: #00cc99;
+            font-weight: bold;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+        }
+
+        .form-section h3 {
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .radio-option input {
+            margin-right: 8px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: #0066cc;
+            box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.1);
+        }
+
+        .upload-section {
+            margin-top: 30px;
+        }
+
+        .upload-container {
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .upload-container:hover {
+            border-color: #0066cc;
+            background-color: rgba(0, 102, 204, 0.05);
+        }
+
+        .upload-icon {
+            font-size: 40px;
+            color: #0066cc;
+            margin-bottom: 15px;
+        }
+
+        .upload-text {
+            margin-bottom: 10px;
+        }
+
+        .upload-hint {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .preview-container {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .preview-image {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 4px;
+        }
+
+        .camera-container {
+            margin-top: 20px;
+            display: none;
+        }
+
+        #cameraFeed {
+            width: 100%;
+            max-height: 300px;
+            background-color: #eee;
+            border-radius: 4px;
+        }
+
+        .camera-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+        }
+
+        button {
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .btn-back {
+            background-color: white;
+            color: #666;
+            border: 1px solid #ddd;
+        }
+
+        .btn-back:hover {
+            background-color: #f5f5f5;
+        }
+
+        .btn-next {
+            background-color: #0066cc;
+            color: white;
+        }
+
+        .btn-next:hover {
+            background-color: #0055aa;
+        }
+
+        .btn-capture {
+            background-color: #00cc99;
+            color: white;
+        }
+
+        .btn-capture:hover {
+            background-color: #00b386;
+        }
+
+        .btn-retry {
+            background-color: #ff6b6b;
+            color: white;
+        }
+
+        .btn-retry:hover {
+            background-color: #ff5252;
+        }
+
+        .verification-section {
+            display: none;
+        }
+
+        .success-container {
+            text-align: center;
+            padding: 30px 0;
+        }
+
+        .success-icon {
+            font-size: 60px;
+            color: #00cc99;
+            margin-bottom: 20px;
+        }
+
+        .success-message {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .success-details {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        /* Form sections - only one visible at a time */
+        #selectIdSection, #uploadIdSection, #verificationSection, #successSection {
+            display: none;
+        }
+
+        #selectIdSection {
+            display: block; /* Initially visible */
+        }
+
+        #fileInput {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <img src="C:\Rishabh\Somaiya\Sem 6\0NO ESE\mpl\NEW\Images\logo.png" alt="VoteChain Logo">
+            </div>
+            <h1><span class="vote-color">Vote</span><span class="chain-color">Chain</span> e-KYC Verification</h1>
+            <p class="subtitle">Verify your identity to ensure secure voting on our platform</p>
+        </header>
+
+        <div class="ekyc-container">
+            <div class="steps-indicator">
+                <div class="step-item active" id="step1">
+                    <div class="step-circle">1</div>
+                    <div class="step-label">Select ID</div>
+                </div>
+                <div class="step-item" id="step2">
+                    <div class="step-circle">2</div>
+                    <div class="step-label">Upload Document</div>
+                </div>
+                <div class="step-item" id="step3">
+                    <div class="step-circle">3</div>
+                    <div class="step-label">Verification</div>
+                </div>
+                <div class="step-item" id="step4">
+                    <div class="step-circle">4</div>
+                    <div class="step-label">Complete</div>
+                </div>
+            </div>
+
+            <!-- Step 1: Select ID Type -->
+            <div class="form-section" id="selectIdSection">
+                <h3>Select Identity Document</h3>
+                <p>Please select the type of document you want to use for verification:</p>
+                
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="idType" value="voter" checked>
+                        Voter ID
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="idType" value="aadhaar">
+                        Aadhaar Card
+                    </label>
+                </div>
+
+                <div class="form-group" id="voterIdFields">
+                    <label for="voterId">Voter ID Number</label>
+                    <input type="text" id="voterId" placeholder="Enter your Voter ID number" maxlength="10">
+                </div>
+
+                <div class="form-group" id="aadhaarFields" style="display: none;">
+                    <label for="aadhaarId">Aadhaar Number</label>
+                    <input type="number" id="aadhaarId" placeholder="Enter your 12-digit Aadhaar number" maxlength="12">
+                </div>
+
+                <div class="form-group">
+                    <label for="dob">Date of Birth</label>
+                    <input type="text" id="dob" placeholder="DD/MM/YYYY">
+                </div>
+
+                <div class="button-container">
+                    <div></div> <!-- Empty div to maintain flex spacing -->
+                    <button class="btn-next" id="nextToUpload">Continue</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Upload Document -->
+            <div class="form-section" id="uploadIdSection">
+                <h3>Upload Document</h3>
+                <p>Please upload a clear photo of your selected identity document.</p>
+
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="uploadMethod" value="upload" checked>
+                        Upload Photo
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="uploadMethod" value="camera">
+                        Use Camera
+                    </label>
+                </div>
+
+                <div class="upload-section" id="uploadMethodFile">
+                    <label for="fileInput" class="upload-container">
+                        <div class="upload-icon">📄</div>
+                        <p class="upload-text">Click to select file or drag and drop</p>
+                        <p class="upload-hint">Supported formats: JPG, PNG, PDF (Max 5MB)</p>
+                    </label>
+                    <input type="file" id="fileInput" accept="image/jpeg,image/png,application/pdf">
+                    
+                    <div class="preview-container" id="previewContainer">
+                        <h4>Document Preview:</h4>
+                        <img src="" alt="Document Preview" class="preview-image" id="previewImage">
+                    </div>
+                </div>
+
+                <div class="camera-container" id="uploadMethodCamera">
+                    <video id="cameraFeed" autoplay></video>
+                    <div class="camera-buttons">
+                        <button class="btn-capture" id="captureButton">Capture Photo</button>
+                        <button class="btn-retry" id="retryButton" style="display: none;">Retry</button>
+                    </div>
+                    <canvas id="captureCanvas" style="display: none;"></canvas>
+                </div>
+
+                <div class="button-container">
+                    <button class="btn-back" id="backToSelect">Back</button>
+                    <button class="btn-next" id="nextToVerify">Continue</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Verification -->
+            <div class="form-section" id="verificationSection">
+                <h3>Document Verification</h3>
+                <p>We are verifying your document. Please wait...</p>
+
+                <div class="verification-progress">
+                    <div id="progressBar" style="width: 100%; height: 8px; background-color: #eee; border-radius: 4px; margin: 30px 0;">
+                        <div id="progressFill" style="width: 0%; height: 100%; background-color: #0066cc; border-radius: 4px; transition: width 1.5s ease;"></div>
+                    </div>
+                    <p id="verificationStatus">Initializing verification...</p>
+                </div>
+
+                <div class="button-container">
+                    <button class="btn-back" id="backToUpload">Back</button>
+                    <button class="btn-next" id="completeVerification" disabled>Continue</button>
+                </div>
+            </div>
+
+            <!-- Step 4: Success -->
+            <div class="form-section" id="successSection">
+                <div class="success-container">
+                    <div class="success-icon">✅</div>
+                    <h3 class="success-message">Verification Successful</h3>
+                    <p class="success-details">Your identity has been successfully verified. You can now proceed with the voting process.</p>
+                    <button class="btn-next" id="finishButton">Continue to Voting</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elements
+            const selectIdSection = document.getElementById('selectIdSection');
+            const uploadIdSection = document.getElementById('uploadIdSection');
+            const verificationSection = document.getElementById('verificationSection');
+            const successSection = document.getElementById('successSection');
+
+            const voterIdFields = document.getElementById('voterIdFields');
+            const aadhaarFields = document.getElementById('aadhaarFields');
+            
+            const uploadMethodFile = document.getElementById('uploadMethodFile');
+            const uploadMethodCamera = document.getElementById('uploadMethodCamera');
+            
+            const fileInput = document.getElementById('fileInput');
+            const previewContainer = document.getElementById('previewContainer');
+            const previewImage = document.getElementById('previewImage');
+            
+            const cameraFeed = document.getElementById('cameraFeed');
+            const captureButton = document.getElementById('captureButton');
+            const retryButton = document.getElementById('retryButton');
+            const captureCanvas = document.getElementById('captureCanvas');
+            
+            const progressFill = document.getElementById('progressFill');
+            const verificationStatus = document.getElementById('verificationStatus');
+            
+            // Step indicators
+            const step1 = document.getElementById('step1');
+            const step2 = document.getElementById('step2');
+            const step3 = document.getElementById('step3');
+            const step4 = document.getElementById('step4');
+            
+            // Navigation buttons
+            const nextToUpload = document.getElementById('nextToUpload');
+            const backToSelect = document.getElementById('backToSelect');
+            const nextToVerify = document.getElementById('nextToVerify');
+            const backToUpload = document.getElementById('backToUpload');
+            const completeVerification = document.getElementById('completeVerification');
+            const finishButton = document.getElementById('finishButton');
+
+            // Change ID Type selection
+            document.querySelectorAll('input[name="idType"]').forEach(function(radio) {
+                radio.addEventListener('change', function() {
+                    if (this.value === 'voter') {
+                        voterIdFields.style.display = 'block';
+                        aadhaarFields.style.display = 'none';
+                    } else {
+                        voterIdFields.style.display = 'none';
+                        aadhaarFields.style.display = 'block';
+                    }
+                });
+            });
+            
+            // Change upload method
+            document.querySelectorAll('input[name="uploadMethod"]').forEach(function(radio) {
+                radio.addEventListener('change', function() {
+                    if (this.value === 'upload') {
+                        uploadMethodFile.style.display = 'block';
+                        uploadMethodCamera.style.display = 'none';
+                        stopCamera();
+                    } else {
+                        uploadMethodFile.style.display = 'none';
+                        uploadMethodCamera.style.display = 'block';
+                        startCamera();
+                    }
+                });
+            });
+            
+            // File upload and preview
+            fileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        previewImage.src = event.target.result;
+                        previewContainer.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            // Camera functions
+            let stream = null;
+            
+            function startCamera() {
+                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                    navigator.mediaDevices.getUserMedia({ video: true })
+                        .then(function(mediaStream) {
+                            stream = mediaStream;
+                            cameraFeed.srcObject = mediaStream;
+                            cameraFeed.play();
+                            captureButton.style.display = 'block';
+                            retryButton.style.display = 'none';
+                        })
+                        .catch(function(err) {
+                            console.log("Camera error: " + err);
+                            alert("Camera access is required for this feature. Please allow camera access or use file upload.");
+                        });
+                } else {
+                    alert("Your browser doesn't support camera access. Please use file upload instead.");
+                }
+            }
+            
+            function stopCamera() {
+                if (stream) {
+                    stream.getTracks().forEach(function(track) {
+                        track.stop();
+                    });
+                    stream = null;
+                }
+            }
+            
+            // Capture photo
+            captureButton.addEventListener('click', function() {
+                const context = captureCanvas.getContext('2d');
+                captureCanvas.width = cameraFeed.videoWidth;
+                captureCanvas.height = cameraFeed.videoHeight;
+                context.drawImage(cameraFeed, 0, 0, captureCanvas.width, captureCanvas.height);
+                
+                const imageDataURL = captureCanvas.toDataURL('image/png');
+                
+                // Display the captured image in preview
+                previewImage.src = imageDataURL;
+                previewContainer.style.display = 'block';
+                
+                // Switch buttons
+                captureButton.style.display = 'none';
+                retryButton.style.display = 'block';
+                
+                // Pause video
+                cameraFeed.pause();
+            });
+            
+            // Retry capture
+            retryButton.addEventListener('click', function() {
+                previewContainer.style.display = 'none';
+                captureButton.style.display = 'block';
+                retryButton.style.display = 'none';
+                
+                // Resume camera
+                if (stream) {
+                    cameraFeed.play();
+                } else {
+                    startCamera();
+                }
+            });
+            
+            // Navigation - Step 1 to Step 2
+            nextToUpload.addEventListener('click', function() {
+                // Basic validation for step 1
+                const voterId = document.getElementById('voterId').value;
+                const aadhaarId = document.getElementById('aadhaarId').value;
+                const dob = document.getElementById('dob').value;
+                const idType = document.querySelector('input[name="idType"]:checked').value;
+                
+                let isValid = true;
+                let errorMessage = "";
+                
+                if (idType === 'voter' && (!voterId || voterId.length < 6)) {
+                    isValid = false;
+                    errorMessage = "Please enter a valid Voter ID number";
+                } else if (idType === 'aadhaar' && (!aadhaarId || aadhaarId.length !== 12)) {
+                    isValid = false;
+                    errorMessage = "Please enter a valid 12-digit Aadhaar number";
+                }
+                
+                if (!dob || !/^\d{2}\/\d{2}\/\d{4}$/.test(dob)) {
+                    isValid = false;
+                    errorMessage = "Please enter a valid date of birth in DD/MM/YYYY format";
+                }
+                
+                if (!isValid) {
+                    alert(errorMessage);
+                    return;
+                }
+                
+                // Proceed to next step
+                selectIdSection.style.display = 'none';
+                uploadIdSection.style.display = 'block';
+                
+                // Update step indicator
+                step1.classList.remove('active');
+                step1.classList.add('completed');
+                step2.classList.add('active');
+            });
+            
+            // Back from Step 2 to Step 1
+            backToSelect.addEventListener('click', function() {
+                uploadIdSection.style.display = 'none';
+                selectIdSection.style.display = 'block';
+                
+                // Update step indicator
+                step2.classList.remove('active');
+                step1.classList.remove('completed');
+                step1.classList.add('active');
+                
+                // Stop camera if it's running
+                stopCamera();
+            });
+            
+            // Navigation - Step 2 to Step 3
+            nextToVerify.addEventListener('click', function() {
+                // Basic validation for step 2
+                const uploadMethod = document.querySelector('input[name="uploadMethod"]:checked').value;
+                let isValid = false;
+                
+                if (uploadMethod === 'upload' && fileInput.files.length > 0) {
+                    isValid = true;
+                } else if (uploadMethod === 'camera' && previewContainer.style.display === 'block') {
+                    isValid = true;
+                }
+                
+                if (!isValid) {
+                    alert("Please upload or capture a document image before proceeding");
+                    return;
+                }
+                
+                // Proceed to verification step
+                uploadIdSection.style.display = 'none';
+                verificationSection.style.display = 'block';
+                
+                // Update step indicator
+                step2.classList.remove('active');
+                step2.classList.add('completed');
+                step3.classList.add('active');
+                
+                // Stop camera if it's running
+                stopCamera();
+                
+                // Start verification simulation
+                simulateVerification();
+            });
+            
+            // Back from Step 3 to Step 2
+            backToUpload.addEventListener('click', function() {
+                verificationSection.style.display = 'none';
+                uploadIdSection.style.display = 'block';
+                
+                // Update step indicator
+                step3.classList.remove('active');
+                step2.classList.remove('completed');
+                step2.classList.add('active');
+                
+                // Reset verification simulation
+                resetVerification();
+                
+                // Resume camera if necessary
+                const uploadMethod = document.querySelector('input[name="uploadMethod"]:checked').value;
+                if (uploadMethod === 'camera') {
+                    startCamera();
+                }
+            });
+            
+            // Complete verification and go to success screen
+            completeVerification.addEventListener('click', function() {
+                verificationSection.style.display = 'none';
+                successSection.style.display = 'block';
+                
+                // Update step indicator
+                step3.classList.remove('active');
+                step3.classList.add('completed');
+                step4.classList.add('active');
+            });
+            
+            // Finish button - would redirect to voting page in actual implementation
+            finishButton.addEventListener('click', function() {
+                alert('Verification complete! Redirecting to voting page...');
+                // In a real implementation, redirect to voting page
+                // window.location.href = '/voting.html';
+            });
+            
+            // Simulate verification progress
+            function simulateVerification() {
+                let progress = 0;
+                const verificationSteps = [
+                    "Initializing verification...",
+                    "Analyzing document...",
+                    "Verifying information...",
+                    "Matching records...",
+                    "Validation complete!",
+                ];
+                let currentStep = 0;
+                
+                progressFill.style.width = "0%";
+                verificationStatus.textContent = verificationSteps[0];
+                
+                const interval = setInterval(function() {
+                    progress += 5;
+                    progressFill.style.width = progress + "%";
+                    
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        verificationStatus.textContent = "Verification successful!";
+                        completeVerification.disabled = false;
+                        return;
+                    }
+                    
+                    // Update status message at certain progress points
+                    if (progress % 25 === 0 && currentStep < verificationSteps.length - 1) {
+                        currentStep++;
+                        verificationStatus.textContent = verificationSteps[currentStep];
+                    }
+                }, 100);
+            }
+            
+            // Reset verification state
+            function resetVerification() {
+                progressFill.style.width = "0%";
+                verificationStatus.textContent = "Initializing verification...";
+                completeVerification.disabled = true;
+            }
+        });
+    </script>
+</body>
+</html>
