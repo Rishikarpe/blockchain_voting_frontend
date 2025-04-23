@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VoteChain - e-KYC Verification</title>
+  <style>
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background-color: #f8f8f8;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .logo h2 {
+      font-size: 24px;
+    }
+
+    .vote-color {
+      color: #0066cc;
+    }
+
+    .chain-color {
+      color: #00cc99;
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      color: #666;
+      margin-bottom: 40px;
+    }
+
+    .ekyc-container {
+      background: #fff;
+      border-radius: 8px;
+      padding: 30px;
+      box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .steps-indicator {
+      display: flex;
+      justify-content: space-between;
+      position: relative;
+      margin-bottom: 40px;
+    }
+
+    .steps-indicator::before {
+      content: "";
+      position: absolute;
+      top: 15px;
+      left: 50px;
+      right: 50px;
+      height: 2px;
+      background: #ddd;
+      z-index: 1;
+    }
+
+    .step-item {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      width: 120px;
+    }
+
+    .step-circle {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #ddd;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 10px;
+      font-weight: bold;
+      color: #666;
+    }
+
+    .step-label {
+      font-size: 14px;
+      color: #666;
+    }
+
+    .active .step-circle {
+      background: #0066cc;
+      color: #fff;
+    }
+
+    .active .step-label {
+      color: #0066cc;
+      font-weight: bold;
+    }
+
+    .completed .step-circle {
+      background: #00cc99;
+      color: #fff;
+    }
+
+    .completed .step-label {
+      color: #00cc99;
+      font-weight: bold;
+    }
+
+    .form-section {
+      margin-bottom: 30px;
+    }
+
+    .form-section h3 {
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .form-group,
+    .radio-group,
+    .upload-section,
+    .camera-container,
+    .verification-progress {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    input:focus,
+    select:focus {
+      outline: none;
+      border-color: #0066cc;
+      box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.1);
+    }
+
+    .radio-group {
+      display: flex;
+      gap: 20px;
+    }
+
+    .radio-option {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .radio-option input {
+      margin-right: 8px;
+    }
+
+    .upload-container {
+      border: 2px dashed #ddd;
+      border-radius: 8px;
+      padding: 30px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.3s, background-color 0.3s;
+    }
+
+    .upload-container:hover {
+      border-color: #0066cc;
+      background: rgba(0, 102, 204, 0.05);
+    }
+
+    .preview-container {
+      display: none;
+      margin-top: 20px;
+    }
+
+    .preview-image {
+      max-width: 100%;
+      max-height: 200px;
+      border-radius: 4px;
+    }
+
+    .camera-container {
+      display: none;
+      margin-top: 20px;
+    }
+
+    #cameraFeed {
+      width: 100%;
+      max-height: 300px;
+      background: #eee;
+      border-radius: 4px;
+    }
+
+    .camera-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .button-container {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 40px;
+    }
+
+    button {
+      padding: 12px 24px;
+      border-radius: 4px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      border: none;
+    }
+
+    .btn-back {
+      background: #fff;
+      color: #666;
+      border: 1px solid #ddd;
+    }
+
+    .btn-back:hover {
+      background: #f5f5f5;
+    }
+
+    .btn-next {
+      background: #0066cc;
+      color: #fff;
+    }
+
+    .btn-next:hover {
+      background: #0055aa;
+    }
+
+    .btn-capture {
+      background: #00cc99;
+      color: #fff;
+    }
+
+    .btn-capture:hover {
+      background: #00b386;
+    }
+
+    .btn-retry {
+      background: #ff6b6b;
+      color: #fff;
+    }
+
+    .btn-retry:hover {
+      background: #ff5252;
+    }
+
+    .verification-progress {
+      margin-bottom: 20px;
+    }
+
+    .verification-section {
+      display: none;
+    }
+
+    .success-container {
+      text-align: center;
+      padding: 30px 0;
+    }
+
+    .success-icon {
+      font-size: 60px;
+      color: #00cc99;
+      margin-bottom: 20px;
+    }
+
+    .success-message {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .success-details {
+      color: #666;
+      margin-bottom: 30px;
+    }
+
+    #selectIdSection,
+    #uploadIdSection,
+    #authSection,
+    #verificationSection,
+    #successSection {
+      display: none;
+    }
+
+    #selectIdSection {
+      display: block;
+    }
+
+    #fileInput {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">
+        <h2><span class="vote-color">Vote</span><span class="chain-color">Chain</span></h2>
+      </div>
+      <h1><span class="vote-color">Vote</span><span class="chain-color">Chain</span> e-KYC Verification</h1>
+      <p class="subtitle">Verify your identity to ensure secure voting on our platform</p>
+    </header>
+
+    <div class="ekyc-container">
+      <div class="steps-indicator">
+        <div class="step-item active" id="step1">
+          <div class="step-circle">1</div>
+          <div class="step-label">Select ID</div>
+        </div>
+        <div class="step-item" id="step2">
+          <div class="step-circle">2</div>
+          <div class="step-label">Recognition</div>
+        </div>
+        <div class="step-item" id="step3">
+          <div class="step-circle">3</div>
+          <div class="step-label">Authentication</div>
+        </div>
+        <div class="step-item" id="step4">
+          <div class="step-circle">4</div>
+          <div class="step-label">Verification</div>
+        </div>
+        <div class="step-item" id="step5">
+          <div class="step-circle">5</div>
+          <div class="step-label">Complete</div>
+        </div>
+      </div>
+
+      <!-- Step 1: Select ID -->
+      <div class="form-section" id="selectIdSection">
+        <h3>Select Identity Document</h3>
+        <p>Please select the type of document you want to use for verification:</p>
+        <div class="radio-group">
+          <label class="radio-option">
+            <input type="radio" name="idType" value="voter" checked>
+            Voter ID
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="idType" value="aadhaar">
+            Aadhaar Card
+          </label>
+        </div>
+        <div class="form-group" id="voterIdFields">
+          <label for="voterId">Voter ID Number</label>
+          <input type="text" id="voterId" placeholder="Enter your Voter ID number" maxlength="10">
+          <small>For testing, use: ABC1234567 with DOB: 15/04/1985</small>
+        </div>
+        <div class="form-group" id="aadhaarFields" style="display: none;">
+          <label for="aadhaarId">Aadhaar Number</label>
+          <input type="number" id="aadhaarId" placeholder="Enter your 12-digit Aadhaar number" maxlength="12">
+          <small>For testing: 123456789012</small>
+        </div>
+        <div class="form-group">
+          <label for="dob">Date of Birth</label>
+          <input type="text" id="dob" placeholder="DD/MM/YYYY">
+        </div>
+        <div class="button-container">
+          <div></div>
+          <button class="btn-next" id="nextToUpload">Continue</button>
+        </div>
+      </div>
+
+      <!-- Step 2: Recognition -->
+      <div class="form-section" id="uploadIdSection">
+        <h3>Live detection</h3>
+        <p>Please give permission to access camera.</p>
+        <div class="radio-group">
+          <label class="radio-option">
+            <input type="radio" name="uploadMethod" value="camera">
+            Use Camera
+          </label>
+        </div>
+
+        <div class="upload-section" id="uploadMethodFile">
+          <label for="fileInput" class="upload-container">
+            <input type="file" id="fileInput" accept="image/jpeg,image/png,application/pdf">
+            <div class="preview-container" id="previewContainer">
+              <h4>Document Preview:</h4>
+              <img src="" alt="Document Preview" class="preview-image" id="previewImage">
+            </div>
+          </label>
+        </div>
+
+        <div class="camera-container" id="uploadMethodCamera">
+          <video id="cameraFeed" autoplay></video>
+          <div class="camera-buttons">
+            <button class="btn-capture" id="captureButton">Capture Photo</button>
+            <button class="btn-retry" id="retryButton" style="display: none;">Retry</button>
+          </div>
+          <canvas id="captureCanvas" style="display: none;"></canvas>
+          <div class="button-container">
+            <button class="btn-back" id="backToSelect">Back</button>
+            <button class="btn-next" id="nextToAuth">Continue</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: Authentication -->
+      <div class="form-section" id="authSection">
+        <h3>Authenticate</h3>
+        <p>Click below to authenticate your session.</p>
+        <button id="authButton" class="auth-button">Start Authentication</button>
+        <div id="status"></div>
+        <div class="button-container">
+          <button class="btn-back" id="backToRecognition">Back</button>
+          <button class="btn-next" id="authButtonStep">Authenticate</button>
+        </div>
+      </div>
+
+      <!-- Step 4: Verification -->
+      <div class="form-section" id="verificationSection">
+        <h3>Document Verification</h3>
+        <p>Please wait while we verify your document...</p>
+        <div class="verification-progress">
+          <div id="progressBar" style="width:100%;height:8px;background:#eee;border-radius:4px;margin:30px 0;">
+            <div id="progressFill" style="width:0%;height:100%;background:#0066cc;border-radius:4px;transition:width 1.5s ease;"></div>
+          </div>
+          <p id="verificationStatus">Initializing verification...</p>
+        </div>
+        <div class="verification-log" id="verificationLog"></div>
+        <div class="button-container">
+          <button class="btn-back" id="backToUpload">Back</button>
+          <button class="btn-next" id="completeVerification" disabled>Continue</button>
+        </div>
+      </div>
+
+      <!-- Step 5: Success -->
+      <div class="form-section" id="successSection">
+        <div class="success-container">
+          <div class="success-icon">✅</div>
+          <h3 class="success-message">Verification Successful</h3>
+          <p class="success-details">Your identity has been verified. You may now proceed.</p>
+          <button class="btn-next" id="finishButton">Finish</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Mock database and verification functions
+      const mockDB = {
+        "ABC1234567": { dob: "15/04/1985", faceHash: "h" },
+        "XYZ9876543": { dob: "22/09/1990", faceHash: "h" },
+        "123456789012": { dob: "10/12/1982", faceHash: "h" },
+        "987654321098": { dob: "05/06/1995", faceHash: "h" }
+      };
+
+      const selectIdSection = document.getElementById('selectIdSection');
+      const uploadIdSection = document.getElementById('uploadIdSection');
+      const authSection = document.getElementById('authSection');
+      const verificationSection = document.getElementById('verificationSection');
+      const successSection = document.getElementById('successSection');
+
+      const voterIdFields = document.getElementById('voterIdFields');
+      const aadhaarFields = document.getElementById('aadhaarFields');
+
+      const uploadMethodFile = document.getElementById('uploadMethodFile');
+      const uploadMethodCamera = document.getElementById('uploadMethodCamera');
+
+      const fileInput = document.getElementById('fileInput');
+      const previewContainer = document.getElementById('previewContainer');
+      const previewImage = document.getElementById('previewImage');
+      const cameraFeed = document.getElementById('cameraFeed');
+      const captureButton = document.getElementById('captureButton');
+      const retryButton = document.getElementById('retryButton');
+      const captureCanvas = document.getElementById('captureCanvas');
+
+      const progressFill = document.getElementById('progressFill');
+      const verificationStatus = document.getElementById('verificationStatus');
+      const verificationLog = document.getElementById('verificationLog');
+
+      const step1 = document.getElementById('step1');
+      const step2 = document.getElementById('step2');
+      const step3 = document.getElementById('step3');
+      const step4 = document.getElementById('step4');
+      const step5 = document.getElementById('step5');
+
+      const nextToUpload = document.getElementById('nextToUpload');
+      const backToSelect = document.getElementById('backToSelect');
+      const nextToAuth = document.getElementById('nextToAuth');
+      const backToRecognition = document.getElementById('backToRecognition');
+      const authButtonStep = document.getElementById('authButtonStep');
+      const backToUpload = document.getElementById('backToUpload');
+      const completeVerification = document.getElementById('completeVerification');
+      const finishButton = document.getElementById('finishButton');
+
+      // Toggle ID type selection
+      document.querySelectorAll('input[name="idType"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+          if (radio.value === 'voter') {
+            voterIdFields.style.display = 'block';
+            aadhaarFields.style.display = 'none';
+          } else {
+            voterIdFields.style.display = 'none';
+            aadhaarFields.style.display = 'block';
+          }
+        });
+      });
+
+      // Toggle camera/file upload method
+      document.querySelectorAll('input[name="uploadMethod"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+          if (radio.value === 'camera') {
+            uploadMethodFile.style.display = 'none';
+            uploadMethodCamera.style.display = 'block';
+            startCamera();
+          } else {
+            uploadMethodFile.style.display = 'block';
+            uploadMethodCamera.style.display = 'none';
+            stopCamera();
+          }
+        });
+      });
+
+      // Camera functions
+      let stream = null;
+      function startCamera() {
+        navigator.mediaDevices.getUserMedia({ video: true }).then(s => {
+          stream = s;
+          cameraFeed.srcObject = s;
+          cameraFeed.play();
+          captureButton.style.display = 'block';
+          retryButton.style.display = 'none';
+        }).catch(() => alert('Allow camera access or select upload method'));
+      }
+
+      function stopCamera() {
+        if (stream) {
+          stream.getTracks().forEach(t => t.stop());
+        }
+      }
+
+      // File upload and preview
+      fileInput.addEventListener('change', e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          previewImage.src = ev.target.result;
+          previewContainer.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      });
+
+      // Capture photo from camera
+      captureButton.addEventListener('click', () => {
+        const ctx = captureCanvas.getContext('2d');
+        captureCanvas.width = cameraFeed.videoWidth;
+        captureCanvas.height = cameraFeed.videoHeight;
+        ctx.drawImage(cameraFeed, 0, 0);
+        previewImage.src = captureCanvas.toDataURL('image/png');
+        previewContainer.style.display = 'block';
+        captureButton.style.display = 'none';
+        retryButton.style.display = 'block';
+        cameraFeed.pause();
+      });
+
+      // Retry capture
+      retryButton.addEventListener('click', () => {
+        previewContainer.style.display = 'none';
+        captureButton.style.display = 'block';
+        retryButton.style.display = 'none';
+        cameraFeed.play();
+      });
+
+      // Logging steps
+      function logStep(msg, type = 'info') {
+        const now = new Date();
+        const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+        const logEntry = document.createElement('div');
+        logEntry.textContent = `[${timeStr}] ${msg}`;
+        logEntry.style.color = type === 'error' ? '#ff5252' : type === 'success' ? '#00cc99' : '#333';
+        verificationLog.appendChild(logEntry);
+        verificationLog.scrollTop = verificationLog.scrollHeight;
+      }
+
+      // Verify UID
+      function verifyUID(type, num, dob) {
+        return new Promise(resolve => {
+          setTimeout(() => {
+            const record = mockDB[num];
+            resolve(record && record.dob === dob ? { verified: true, userData: record } : { verified: false, error: 'Invalid ID or DOB' });
+          }, 1500);
+        });
+      }
+
+      // Face recognition function
+      function performFaceRecognition(image, hash) {
+        return new Promise(resolve => {
+          setTimeout(() => {
+            const success = Math.random() < 0.8;
+            resolve(success ? { success: true } : { success: false, error: 'Face verification failed' });
+          }, 2000);
+        });
+      }
+
+      // Step navigation
+      nextToUpload.addEventListener('click', () => {
+        const type = document.querySelector('input[name="idType"]:checked').value;
+        const num = type === 'voter' ? document.getElementById('voterId').value : document.getElementById('aadhaarId').value;
+        const dob = document.getElementById('dob').value;
+        if (!num || !/\d{2}\/\d{2}\/\d{4}/.test(dob)) return alert('Enter valid ID & DOB');
+        selectIdSection.style.display = 'none';
+        uploadIdSection.style.display = 'block';
+        step1.classList.remove('active');
+        step1.classList.add('completed');
+        step2.classList.add('active');
+      });
+
+      backToSelect.addEventListener('click', () => {
+        uploadIdSection.style.display = 'none';
+        selectIdSection.style.display = 'block';
+        step2.classList.remove('active');
+        step1.classList.remove('completed');
+        step1.classList.add('active');
+        stopCamera();
+      });
+
+      nextToAuth.addEventListener('click', () => {
+        if (!previewImage.src) return alert('Upload or capture your ID');
+        uploadIdSection.style.display = 'none';
+        authSection.style.display = 'block';
+        step2.classList.remove('active');
+        step2.classList.add('completed');
+        step3.classList.add('active');
+        stopCamera();
+      });
+
+      backToRecognition.addEventListener('click', () => {
+        authSection.style.display = 'none';
+        uploadIdSection.style.display = 'block';
+        step3.classList.remove('active');
+        step2.classList.remove('completed');
+        step2.classList.add('active');
+      });
+
+      authButtonStep.addEventListener('click', () => {
+        authSection.style.display = 'none';
+        verificationSection.style.display = 'block';
+        step3.classList.remove('active');
+        step3.classList.add('completed');
+        step4.classList.add('active');
+        startVerification();
+      });
+
+      backToUpload.addEventListener('click', () => {
+        verificationSection.style.display = 'none';
+        uploadIdSection.style.display = 'block';
+        step4.classList.remove('active');
+        step2.classList.remove('completed');
+        step2.classList.add('active');
+        progressFill.style.width = '0%';
+        verificationStatus.textContent = 'Initializing verification...';
+        verificationLog.innerHTML = '';
+        completeVerification.disabled = true;
+      });
+
+      completeVerification.addEventListener('click', () => {
+        verificationSection.style.display = 'none';
+        successSection.style.display = 'block';
+        step4.classList.remove('active');
+        step4.classList.add('completed');
+        step5.classList.add('active');
+      });
+
+      finishButton.addEventListener('click', () => {
+        alert('Process complete.');
+        window.location.href = "C:/Rishabh/Somaiya/Sem 6/0NO ESE/mpl/FINAL/Vote.html"; // Replace with your desired page URL
+      });
+
+      function startVerification() {
+        progressFill.style.width = '0%';
+        verificationStatus.textContent = 'Initializing verification...';
+        verificationLog.innerHTML = '';
+        const type = document.querySelector('input[name="idType"]:checked').value;
+        const num = type === 'voter' ? document.getElementById('voterId').value : document.getElementById('aadhaarId').value;
+        const dob = document.getElementById('dob').value;
+        logStep('Starting e-KYC verification');
+        logStep('Verifying credentials');
+        progressFill.style.width = '20%';
+        verificationStatus.textContent = 'Verifying credentials...';
+
+        verifyUID(type, num, dob).then(res => {
+          if (res.verified) {
+            logStep('Credentials verified', 'success');
+            logStep('Performing facial recognition');
+            progressFill.style.width = '60%';
+            verificationStatus.textContent = 'Recognizing face...';
+
+            performFaceRecognition(previewImage.src, res.userData.faceHash).then(fr => {
+              if (fr.success) {
+                logStep('Face recognized', 'success');
+                progressFill.style.width = '100%';
+                verificationStatus.textContent = 'Verification complete';
+                completeVerification.disabled = false;
+              } else {
+                logStep(fr.error, 'error');
+                verificationStatus.textContent = 'Recognition failed';
+              }
+            });
+          } else {
+            logStep(res.error, 'error');
+            verificationStatus.textContent = 'Credential verification failed';
+          }
+        });
+      }
+    });
+    document.getElementById('authButton').addEventListener('click', function () {
+        this.disabled = true;
+        this.textContent = 'Starting...';
+
+        const statusElement = document.getElementById('status');
+        statusElement.textContent = 'Starting authentication process...';
+        statusElement.className = '';
+        statusElement.style.display = 'block';
+
+        fetch('/run-authentication', { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    statusElement.textContent = 'Authentication started. Waiting for completion...';
+                    statusElement.classList.remove('error');
+                    pollForAuthStatus();
+                } else {
+                    statusElement.textContent = 'Error: ' + data.message;
+                    statusElement.classList.add('error');
+                    this.disabled = false;
+                    this.textContent = 'Start Authentication';
+                }
+            })
+            .catch(error => {
+                statusElement.textContent = 'Error: ' + error.message;
+                statusElement.classList.add('error');
+                this.disabled = false;
+                this.textContent = 'Start Authentication';
+            });
+    });
+
+    function pollForAuthStatus() {
+        const statusElement = document.getElementById('status');
+        const interval = setInterval(() => {
+            fetch('/check-auth-status')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'authenticated') {
+                        clearInterval(interval);
+                        statusElement.textContent = 'Live Authentication Successful ✅';
+                        statusElement.classList.remove('error');
+                        statusElement.classList.add('success');
+                        document.getElementById('authButton').disabled = false;
+                        document.getElementById('authButton').textContent = 'Start Authentication';
+                    }
+                });
+        }, 1000); // Check every second
+    }
+  </script>
+</body>
+</html>

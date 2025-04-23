@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Election Results</title>
+  <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+  <style>
+    body {
+      background: linear-gradient(to right, #1c1e7d, #5e2ca5);
+      color: white;
+      font-family: 'Poppins', sans-serif;
+      text-align: center;
+      padding: 50px;
+    }
+    .container {
+      background: white;
+      color: black;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 500px;
+      margin: auto;
+    }
+    .candidate {
+      margin: 10px 0;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>📊 Election Results</h2>
+    <p>Connected Account: <span id="account">Not Connected</span></p>
+    <button onclick="connectWallet()">Connect MetaMask</button>
+    <div id="results"></div>
+  </div>
+
+  <script>
+    let account;
+    const contractAddress = "0xA70c3515a3b30cf418371F5b1e20EE15fEA4CC5b";
+    const contractABI = [ [
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			}
+		],
+		"name": "addCandidate",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "candidateId",
+				"type": "uint256"
+			}
+		],
+		"name": "vote",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "admin",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "candidates",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "id",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "voteCount",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "candidatesCount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "candidateId",
+				"type": "uint256"
+			}
+		],
+		"name": "getVotes",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "hasVoted",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+] ][0];
+    let contract;
+
+    async function connectWallet() {
+      if (window.ethereum) {
+        const web3 = new Web3(window.ethereum);
+        try {
+          const accounts = await ethereum.request({ method: "eth_requestAccounts" });
+          account = accounts[0];
+          document.getElementById("account").innerText = account;
+          contract = new web3.eth.Contract(contractABI, contractAddress);
+          showResults();
+        } catch (error) {
+          console.error("User denied account access", error);
+        }
+      } else {
+        alert("Please install MetaMask!");
+      }
+    }
+
+    async function showResults() {
+      const count = await contract.methods.candidatesCount().call();
+      const resultsDiv = document.getElementById("results");
+      resultsDiv.innerHTML = "";
+
+      for (let i = 1; i <= count; i++) {
+        const candidate = await contract.methods.candidates(i).call();
+        const voteCount = await contract.methods.getVotes(i).call();
+
+        const line = document.createElement("div");
+        line.classList.add("candidate");
+        line.innerText = `${candidate.name} — ${voteCount} vote(s)`;
+        resultsDiv.appendChild(line);
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Vote - Online Voting</title>
+  <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: linear-gradient(to right, #5e2ca5, #1c1e7d, #e6af2e);
+      color: white;
+      font-family: 'Poppins', sans-serif;
+    }
+    .container {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      color: black;
+      text-align: center;
+      width: 80%;
+      max-width: 600px;
+    }
+    button {
+      padding: 10px;
+      margin: 10px;
+      background: #5e2ca5;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #46208a;
+    }
+    .candidate {
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Vote for Your Candidate 🗳️</h2>
+    <p>Connected Account: <span id="account">Not Connected</span></p>
+    <button onclick="connectWallet()">Connect MetaMask</button>
+    <div id="candidates"></div>
+  </div>
+
+  <script>
+    let account;
+    const contractAddress = "0xA70c3515a3b30cf418371F5b1e20EE15fEA4CC5b";
+    const contractABI = [ [
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			}
+		],
+		"name": "addCandidate",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "candidateId",
+				"type": "uint256"
+			}
+		],
+		"name": "vote",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "admin",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "candidates",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "id",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "voteCount",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "candidatesCount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "candidateId",
+				"type": "uint256"
+			}
+		],
+		"name": "getVotes",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "hasVoted",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+] ][0];
+    let contract;
+
+    async function connectWallet() {
+      if (window.ethereum) {
+        const web3 = new Web3(window.ethereum);
+        try {
+          const accounts = await ethereum.request({ method: "eth_requestAccounts" });
+          account = accounts[0];
+          document.getElementById("account").innerText = account;
+          contract = new web3.eth.Contract(contractABI, contractAddress);
+
+          const hasAlreadyVoted = await contract.methods.hasVoted(account).call();
+          renderCandidates(hasAlreadyVoted);
+        } catch (error) {
+          console.error("User denied account access", error);
+        }
+      } else {
+        alert("Please install MetaMask!");
+      }
+    }
+
+    async function renderCandidates(disableVoting) {
+  const count = await contract.methods.candidatesCount().call();
+  const container = document.getElementById("candidates");
+  container.innerHTML = "<h3>Select a Candidate:</h3>";
+
+  for (let i = 1; i <= count; i++) {
+    const candidate = await contract.methods.candidates(i).call();
+
+    const candidateDiv = document.createElement("div");
+    candidateDiv.classList.add("candidate");
+
+    const btn = document.createElement("button");
+    btn.innerText = `${candidate.name} 🗳️`;  // Removed vote count
+    btn.disabled = disableVoting;
+    btn.onclick = () => vote(i);
+
+    candidateDiv.appendChild(btn);
+    container.appendChild(candidateDiv);
+  }
+
+  if (disableVoting) {
+    const msg = document.createElement("p");
+    msg.innerText = "You have already voted.";
+    msg.style.color = "red";
+    container.appendChild(msg);
+  }
+}
+
+
+
+    async function vote(candidateId) {
+      if (!account || !contract) {
+        alert("Please connect to MetaMask first.");
+        return;
+      }
+      try {
+        await contract.methods.vote(candidateId).send({ from: account });
+        alert("Vote cast successfully!");
+        const hasVotedNow = await contract.methods.hasVoted(account).call();
+        renderCandidates(hasVotedNow);
+      } catch (error) {
+        console.error("Voting failed", error);
+        alert("Voting failed. You may have already voted.");
+      }
+    } 
+
+
+  </script>
+</body>
+</html>
